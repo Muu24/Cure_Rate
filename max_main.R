@@ -191,5 +191,6 @@ for(i in 1:5){
   likvalue[i]<-log(resultstemp$value)
 }
 colMeans(para)
+#####
 
  
