@@ -2,11 +2,12 @@
 library(survival)
 library(compoisson)
 library(flexsurv)
-library(sqldf)
+#library(sqldf)
 #data(kidney)
 #head(kidney)
 #str(kidney)
 #kidney$disease
+set.seed(400045252)
 ##Survival function for suceptible individuals
 H_0<-function(gam1,gam2,t){
   return((t/gam2)^(gam1))
@@ -179,18 +180,25 @@ Max<-function(gam1,gam2,beta1,beta0_w,sigma,q){
   likelihood1<-((1-p0temp)^delta_ij)*main*prI1
   likelihood2<-p0temp*((1-p0temp)^delta_ij)*prI0
   likelihood<-likelihood1+likelihood2
-  like_final<-prod(likelihood)
-  return((like_final))
+  like_final<-sum(log(likelihood))
+  return(like_final)
 }
 Max(4,3,-log(2),log(1.5),1,1/3)
-para<-matrix(NA,5,6)
-likvalue<-c(rep(NA,5))
-for(i in 1:5){
-  resultstemp<-optim(c(3,3,-log(2),log(1.5),1,1/3), method = 'L-BFGS-B',lower=c(0,0,-2,0,0,0),function(x) Max(x[1],x[2],x[3],x[4],x[5],x[6]))
-  para[i,]<-c(resultstemp$par)
-  likvalue[i]<-log(resultstemp$value)
+#para<-matrix(NA,5,6)
+#likvalue<-c(rep(NA,5))
+resultstemp<-vector('list',300)
+for(i in 1:300){
+  resultstemp[[i]]<-try(optim(c(4,3,-log(2),log(1.5),1,1/3), method = 'L-BFGS-B',lower=c(0,0,-2,0,0,0),function(x) Max(x[1],x[2],x[3],x[4],x[5],x[6])),TRUE)
+  #para[i,]<-c(resultstemp$par)
+  #likvalue[i]<-log(resultstemp$value)
 }
-colMeans(para)
+working <- resultstemp[sapply(resultstemp, function(x) !inherits(x, "try-error"))]
+
 #####
 
- 
+para<-matrix(NA,length(working),6)
+for(i in 1:nrow(para)){
+  para[i,] <- working[[i]]$par
+}
+para
+colMeans(para)
