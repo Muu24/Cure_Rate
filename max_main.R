@@ -7,7 +7,8 @@ library(flexsurv)
 #head(kidney)
 #str(kidney)
 #kidney$disease
-set.seed(400045252)
+seed <- 20
+set.seed(seed)
 ##Survival function for suceptible individuals
 H_0<-function(gam1,gam2,t){
   return((t/gam2)^(gam1))
@@ -186,8 +187,8 @@ Max<-function(gam1,gam2,beta1,beta0_w,sigma,q){
 Max(4,3,-log(2),log(1.5),1,1/3)
 #para<-matrix(NA,5,6)
 #likvalue<-c(rep(NA,5))
-resultstemp<-vector('list',300)
-for(i in 1:300){
+resultstemp<-vector('list',10)
+for(i in 1:10){
   resultstemp[[i]]<-try(optim(c(4,3,-log(2),log(1.5),1,1/3), method = 'L-BFGS-B',lower=c(0,0,-2,0,0,0),function(x) Max(x[1],x[2],x[3],x[4],x[5],x[6])),TRUE)
   #para[i,]<-c(resultstemp$par)
   #likvalue[i]<-log(resultstemp$value)
@@ -202,3 +203,5 @@ for(i in 1:nrow(para)){
 }
 para
 colMeans(para)
+
+saveRDS(para,paste("results",seed,".RDS",sep=""))
